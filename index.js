@@ -97,7 +97,7 @@ class BandcampParser {
               }
   
               if(!albumEntry.tags.includes(tag)) {
-                await this.albums.addTagToAlbum(tag, album.url);
+                await this.albums.addTagsToAlbum(tag, album.url);
               }
   
             });
