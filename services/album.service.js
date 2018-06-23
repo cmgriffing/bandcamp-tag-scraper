@@ -12,7 +12,7 @@ module.exports = class AlbumService {
     return this._database.find({});
   }
 
-  getAllByTag(tags) {
+  getAllByTags(tags) {
     return this._database.find({ tags: { $all: tags } })
   }
 
@@ -20,8 +20,8 @@ module.exports = class AlbumService {
     return this._database.findOne({url});
   }
 
-  addTagToAlbum(tag, url) {
-    return this._database.update({ url } ,{ $addToSet: { tags: tag } });
+  addTagsToAlbum(tags, url) {
+    return this._database.update({ url } ,{ $addToSet: { tags: tags } });
   }
 
   removeTagFromAlbum(tag, url) {
