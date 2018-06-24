@@ -13,7 +13,31 @@ const parser = new BandcampParser(true);
 // }();
 
 const testDatabaseAndQueue = async function() {
-  await delay(1000);
-  await parser.playlists.create('Synthwave Playlist');
-  await parser.playlists.addTagToPlaylist('synthwave', 'Synthwave Playlist');
+  try{
+      
+    await parser.clearDatabases();
+    await delay(10000);
+    const now = Date.now();
+    await parser.playlists.create('Synthwave Playlist ' + now);
+    await parser.playlists.addTagsToPlaylist(['synthwave', 'chillwave', 'lo-fi'], 'Synthwave Playlist ' + now);
+
+    const playlists = await parser.playlists.getAll();
+    console.log('playlists: ', JSON.stringify(playlists));
+
+    setInterval(async () => {
+      try {
+        const totalAlbums = await parser.albums.getAll();
+        console.log(`Found ${totalAlbums.length} total albums.`);
+        const synthwaveAlbums = await parser.albums.getAllByTags('synthwave');
+        console.log(`Found ${synthwaveAlbums.length} synthwave albums.`);
+        const albums = await parser.albums.getAllByTags(['synthwave', 'chillwave']);
+        console.log(`Found ${albums.length} synthwave and chillwave albums.`);
+      } catch(error) {
+        console.log('error in test interval: ', error.message);
+      }
+    }, 10000);
+
+  } catch(error) {
+    console.log('error in test: ', error.message);
+  }
 }();
