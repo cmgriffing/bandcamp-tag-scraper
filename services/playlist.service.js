@@ -5,7 +5,14 @@ module.exports = class PlayListService {
   }
 
   async create(name) {
+    if(await this._database.findOne({ name })) {
+      throw new Error(`You can't create a playlist with an existing name.`);
+    }
     return this._database.insert({ name, tags: [], lastQueried: 0 });
+  }
+
+  async remove(name) {
+    return this._database.remove({ name }, { multi: true });
   }
 
   async updateTimestamp(name) {
