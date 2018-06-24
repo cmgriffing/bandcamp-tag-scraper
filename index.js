@@ -96,9 +96,7 @@ class BandcampParser {
                 );
               }
   
-              if(!albumEntry.tags.includes(tag)) {
-                await this.albums.addTagsToAlbum(tag, album.url);
-              }
+              await this.albums.addTagToAlbum(tag, album.url);
   
             });
           }
@@ -163,14 +161,14 @@ class BandcampParser {
 
 module.exports = BandcampParser;
 
-// process.on('unhandledRejection', function (error) {
-//   // Will print "unhandledRejection err is not defined"
-//   console.log('unhandledRejection', error.message);
-//   throw error;
-// });
+process.on('unhandledRejection', function (error) {
+  // Will print "unhandledRejection err is not defined"
+  console.log('unhandledRejection', error.message);
+  throw error;
+});
 
-// process.on('uncaughtException', function(error) {
-//   // Will print "unhandledRejection err is not defined"
-//   console.log('uncaughtException', error.message);
-//   throw error;
-// });
+process.on('uncaughtException', function(error) {
+  // Will print "unhandledRejection err is not defined"
+  console.log('uncaughtException', error.message);
+  throw error;
+});

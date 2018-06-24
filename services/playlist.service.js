@@ -25,7 +25,13 @@ module.exports = class PlayListService {
   }
 
   async addTagsToPlaylist(tags, playlistName) {
-    return this._database.update({ name: playlistName} ,{ $addToSet: { tags: tags } });
+    if(!Array.isArray(tags)) {
+      tags = [tags];
+    }
+    return this._database.update(
+      { name: playlistName},
+      { $addToSet: { tags: { $each: tags } } }
+    );
   }
 
   async removeTagFromPlayList(tag, playlistName) {
