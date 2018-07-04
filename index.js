@@ -66,7 +66,7 @@ function parserFactory(path) {
             playlist.tags.map(tag => {
               if(
                 !this.tagTimestamps[tag] ||
-                (this.tagTimestamps[tag] && this.tagTimestamps[tag] < Date.now() - (60000 * 60))
+                (this.tagTimestamps[tag] && this.tagTimestamps[tag] < Date.now() - (60000 * 60 * 12))
               ) {
                 this.queuedTags.add(tag);
                 this.tagTimestamps[tag] = Date.now();
@@ -75,10 +75,11 @@ function parserFactory(path) {
             });
           });
 
+          const pageCount = 3;
           const results = {};
           const queuedTagsArray = Array.from(this.queuedTags);
-          for(let i = 0; i < 5 && i < queuedTagsArray.length; i++ ) {
-            const tag = queuedTagsArray[i];
+          for(let tagIndex = 0; tagIndex < 5 && tagIndex < queuedTagsArray.length; tagIndex++ ) {
+            const tag = queuedTagsArray[tagIndex];
             const entry = await Timestamps.findOne({name: tag});
             if(!entry) {
               await Timestamps.insert({ name: tag, timestamp: Date.now(), type: 'tag' });
@@ -86,23 +87,28 @@ function parserFactory(path) {
               await Timestamps.update({ name: tag }, { $set: { timestamp: Date.now(), type: 'tag' } });
             }
             this.fetchedTags.push(tag);
-            const albums = await this._getAlbumsByTag(tag);
-            if(albums) {
-              albums.map(async album => {
-                let albumEntry = await this.albums.getByUrl(album.url);
-                if(!albumEntry) {
-                  albumEntry = await this.albums.create(
-                    album.url,
-                    album.image,
-                    album.name,
-                    album.artist,
-                  );
-                }
+            for(let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+              const albums = await this._getAlbumsByTag(tag, pageNumber);
+              if(albums) {
+                albums.map(async album => {
+                  let albumEntry = await this.albums.getByUrl(album.url);
+                  if(!albumEntry) {
+                    albumEntry = await this.albums.create(
+                      album.url,
+                      album.image,
+                      album.name,
+                      album.artist,
+                    );
+                  }
+  
+                  await this.albums.addTagToAlbum(tag, album.url);
+  
+                });
+              }
 
-                await this.albums.addTagToAlbum(tag, album.url);
-
-              });
+              await delay(10000);
             }
+            
             await delay(10000);
           }
 
@@ -118,7 +124,7 @@ function parserFactory(path) {
       };
 
       timerFunction();
-      this._initTimer = setInterval(timerFunction, 60000);
+      this._initTimer = setInterval(timerFunction, 60000 * 10);
     }
 
     clearDatabases() {

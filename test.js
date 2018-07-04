@@ -1,6 +1,7 @@
-const BandcampParser = require('./index.js');
+const parserFactory = require('./index.js');
 const delay = require('timeout-as-promise');
 
+const BandcampParser = parserFactory('./');
 const parser = new BandcampParser(true);
 
 
