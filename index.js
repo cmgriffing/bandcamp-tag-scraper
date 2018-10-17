@@ -136,13 +136,13 @@ function parserFactory(path) {
         const unfilteredAlbum = await this.albums.getUnfilteredAlbum();
         if(unfilteredAlbum) {
           const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unfilteredAlbum.url);
-          this.setAlbumFilters(unfilteredAlbum, longEnough, fullyPlayable);
+          this.albums.setAlbumFilters(unfilteredAlbum, longEnough, fullyPlayable);
         } else {
           const unplayableAlbum = await this.albums.getUnplayableAlbum();
 
           if(unplayableAlbum) {
             const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unplayableAlbum.url);
-            this.setAlbumFilters(unplayableAlbum, longEnough, fullyPlayable);
+            this.albums.setAlbumFilters(unplayableAlbum, longEnough, fullyPlayable);
           }
         }
       };
