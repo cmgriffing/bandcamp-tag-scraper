@@ -48,8 +48,8 @@ module.exports = class AlbumService {
 
   getUnfilteredAlbum() {
     return this._database.findOne({
-      longEnough: { $exists : false },
-      fullyPlayable: { $exists : false },
+      longEnough: { $exists: false },
+      fullyPlayable: { $exists: false },
     });
   }
 
@@ -62,7 +62,7 @@ module.exports = class AlbumService {
   }
 
   setAlbumFilters(albumUrl, longEnough, fullyPlayable) {
-    return this._database.update({ albumUrl }, {
+    return this._database.update({ url: albumUrl }, {
       $set: {
         longEnough,
         fullyPlayable,
