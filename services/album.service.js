@@ -45,4 +45,30 @@ module.exports = class AlbumService {
   removeTagFromAlbum(tag, url) {
     return this._database.update({ url } ,{ $pull: { tags: tag } });
   }
+
+  getUnfilteredAlbum() {
+    return this._database.findOne({
+      longEnough: { $exists : false },
+      fullyPlayable: { $exists : false },
+    });
+  }
+
+  getUnplayableAlbum() {
+    return this._database.findOne({
+      longEnough: true,
+      fullyPlayable: false,
+      lastChecked: { $gt: Date.now() + (3600 * 4 ) }
+    });
+  }
+
+  setAlbumFilters(albumUrl, longEnough, fullyPlayable) {
+    return this._database.update({ albumUrl }, {
+      $set: {
+        longEnough,
+        fullyPlayable,
+        lastChecked: Date.now()
+      }
+    })
+  }
+
 }

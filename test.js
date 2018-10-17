@@ -5,17 +5,17 @@ const BandcampParser = parserFactory('./');
 const parser = new BandcampParser(true);
 
 
-// const testBasicFuncionality = function() {
-//   const results = parser._getAlbumsByTag('synthwave', 1).then(result => {
-//     console.log('test results', JSON.stringify(result));
-//   }).catch(error => {
-//     console.error('test error', JSON.stringify(error));
-//   });
-// }();
+const testBasicFuncionality = function() {
+  const results = parser._getAlbumsByTag('synthwave', 1).then(result => {
+    console.log('test results', JSON.stringify(result));
+  }).catch(error => {
+    console.error('test error', JSON.stringify(error));
+  });
+};
 
 const testDatabaseAndQueue = async function() {
   try{
-      
+
     await parser.clearDatabases();
     await delay(10000);
     const now = Date.now();
@@ -41,4 +41,15 @@ const testDatabaseAndQueue = async function() {
   } catch(error) {
     console.log('error in test: ', error.message);
   }
-}();
+};
+
+const testFetchingMetadata = async function() {
+  try {
+    // Eventually this test will fail when the album "releases"
+    // new albums will need to be fetched from time to time
+    const metadata = await parser._getAlbumMetadata('https://jstrecords.bandcamp.com/album/fears-and-dreams-of-living-machines-lp');
+    console.log('metadata', metadata);
+  } catch (e) {
+    console.log('Error testing the fetching of album metadata: ', e);
+  }
+};

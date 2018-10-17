@@ -31,10 +31,12 @@ function parserFactory(path) {
     };
 
     setupState() {
-      this._initTimer = null;
+      this._initAlbumsTimer = null;
       this._lastQueried = 1;
       this.queuedTags = new Set();
       this.fetchedTags = [];
+
+      this._initFiltersTimer = null;
 
       // services exposed as properties
       this.playlists = new PlayListService(Playlists);
@@ -48,12 +50,14 @@ function parserFactory(path) {
           }
         });
 
-        this.setupTimer();
+        this.setupAlbumsTimer();
+        this.setupFiltersTimer();
+
       });
 
     }
 
-    setupTimer() {
+    setupAlbumsTimer() {
       const timerFunction = async () => {
         try{
 
@@ -100,15 +104,15 @@ function parserFactory(path) {
                       album.artist,
                     );
                   }
-  
+
                   await this.albums.addTagToAlbum(tag, album.url);
-  
+
                 });
               }
 
               await delay(10000);
             }
-            
+
             await delay(10000);
           }
 
@@ -124,7 +128,27 @@ function parserFactory(path) {
       };
 
       timerFunction();
-      this._initTimer = setInterval(timerFunction, 60000 * 10);
+      this._initAlbumsTimer = setInterval(timerFunction, 60000 * 10);
+    }
+
+    setupFiltersTimer() {
+      const timerFunction = async () => {
+        const unfilteredAlbum = await this.albums.getUnfilteredAlbum();
+        if(unfilteredAlbum) {
+          const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unfilteredAlbum.url);
+          this.setAlbumFilters(unfilteredAlbum, longEnough, fullyPlayable);
+        } else {
+          const unplayableAlbum = await this.albums.getUnplayableAlbum();
+
+          if(unplayableAlbum) {
+            const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unplayableAlbum.url);
+            this.setAlbumFilters(unplayableAlbum, longEnough, fullyPlayable);
+          }
+        }
+      };
+
+      timerFunction();
+      this._initFiltersTimer = setInterval(timerFunction, 30000);
     }
 
     clearDatabases() {
@@ -166,7 +190,39 @@ function parserFactory(path) {
 
       });
     }
+
+    _getAlbumMetadata(albumUrl) {
+      return new Promise((resolve, reject) => {
+        superagent.get(albumUrl)
+          .end((err, res) => {
+            if(err) {
+              console.warn('error fetching album metadata', albumUrl, err);
+              reject(err);
+              return;
+            }
+            const $ = cheerio.load(res.text);
+            const rows = $('.track_row_view');
+            const playableRows = rows.filter((index, row) => {
+              const titleLink = $(row).find('.title a');
+              if(titleLink.length > 0) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+
+            const isPlayable = (rows.length === playableRows.length);
+            const longEnough = (rows.length > 3);
+            resolve({
+              isPlayable,
+              longEnough,
+            });
+          });
+      });
+    }
+
   };
+
 
   return BandcampParser;
 
