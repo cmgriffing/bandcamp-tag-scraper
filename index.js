@@ -59,6 +59,7 @@ function parserFactory(path) {
 
     setupAlbumsTimer() {
       const timerFunction = async () => {
+        console.log('firing albums timer');
         try{
 
           // Fetching the tags that need to be searched
@@ -128,21 +129,24 @@ function parserFactory(path) {
       };
 
       timerFunction();
-      this._initAlbumsTimer = setInterval(timerFunction, 60000 * 10);
+      this._initAlbumsTimer = setInterval(timerFunction, 60000 * 1);
     }
 
     setupFiltersTimer() {
       const timerFunction = async () => {
+        console.log('firing filters timer');
         const unfilteredAlbum = await this.albums.getUnfilteredAlbum();
         if(unfilteredAlbum) {
           const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unfilteredAlbum.url);
-          this.albums.setAlbumFilters(unfilteredAlbum, longEnough, fullyPlayable);
+          console.log('settingFilters: ', unfilteredAlbum.url, longEnough, fullyPlayable);
+          this.albums.setAlbumFilters(unfilteredAlbum.url, longEnough, fullyPlayable);
         } else {
           const unplayableAlbum = await this.albums.getUnplayableAlbum();
 
           if(unplayableAlbum) {
             const { longEnough,  fullyPlayable } = await this._getAlbumMetadata(unplayableAlbum.url);
-            this.albums.setAlbumFilters(unplayableAlbum, longEnough, fullyPlayable);
+            console.log('settingFilters: ', unplayableAlbum.url, longEnough, fullyPlayable);
+            this.albums.setAlbumFilters(unplayableAlbum.url, longEnough, fullyPlayable);
           }
         }
       };
@@ -211,10 +215,10 @@ function parserFactory(path) {
               }
             });
 
-            const isPlayable = (rows.length === playableRows.length);
+            const fullyPlayable = (rows.length === playableRows.length);
             const longEnough = (rows.length > 3);
             resolve({
-              isPlayable,
+              fullyPlayable,
               longEnough,
             });
           });
