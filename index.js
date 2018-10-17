@@ -201,7 +201,10 @@ function parserFactory(path) {
           .end((err, res) => {
             if(err) {
               console.warn('error fetching album metadata', albumUrl, err);
-              reject(err);
+              resolve({
+                fullyPlayable: false,
+                longEnough: false,
+              });
               return;
             }
             const $ = cheerio.load(res.text);
